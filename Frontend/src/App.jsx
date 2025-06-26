@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-
-import Navbar from "./components/Navbar";
-import Dashboard from "./pages/Dashboard";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
-import Transactions from "./pages/Transaction";
+import Dashboard from "./pages/Dashboard";
+import Transaction from "./pages/Transaction";
+import Navbar from "./components/Navbar";
 
 function App() {
   // Using Localstorage
@@ -30,69 +28,8 @@ function App() {
   //   );
   // };
 
-  // Using MongoDB
-  const [transactions, setTransactions] = useState([]);
-
-  useEffect(() => {
-    fetch("http://localhost:2411/transactions")
-      .then((res) => res.json())
-      .then((data) => {
-        setTransactions(data);
-      })
-      .catch((err) => {
-        console.error("Error fetching transactions:", err);
-      });
-  }, []);
-
-  const addTransaction = async (tx) => {
-    try {
-      const res = await fetch("http://localhost:2411/transactions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(tx),
-      });
-
-      const newTx = await res.json();
-      setTransactions((prev) => [newTx, ...prev]);
-    } catch (err) {
-      console.error("Error adding transaction:", err);
-    }
-  };
-
-  const deleteTransaction = async (_id) => {
-    try {
-      await fetch(`http://localhost:2411/transactions/${_id}`, {
-        method: "DELETE",
-      });
-
-      setTransactions((prev) => prev.filter((t) => t._id !== _id));
-    } catch (err) {
-      console.error("Error deleting transaction:", err);
-    }
-  };
-
-  const editTransaction = async (_id, tx) => {
-    try {
-      await fetch(`http://localhost:2411/transactions/${_id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(tx),
-      });
-
-      setTransactions((prev) =>
-        prev.map((t) => (t._id !== _id ? t : { ...t, ...tx }))
-      );
-    } catch (err) {
-      console.error("Error deleting transaction:", err);
-    }
-  };
-
-  return (
-    <Router>
-      <Navbar />
-      <h1 className="main-heading">Personal Finance Tracker</h1>
-
-      <div>
+  {
+    /* <div>
         <Routes>
           <Route path="/" element={<Home transactions={transactions} />} />
           <Route
@@ -111,7 +48,25 @@ function App() {
             element={<Dashboard transactions={transactions} />}
           />
         </Routes>
-      </div>
+      </div> */
+  }
+
+  return (
+    <Router>
+      <Navbar />
+      <h1 className="main-heading">Expense Tracker</h1>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/transaction"
+          element={
+            <div className="main-container">
+              <Transaction />
+            </div>
+          }
+        />
+      </Routes>
     </Router>
   );
 }

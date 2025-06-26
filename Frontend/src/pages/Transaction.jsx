@@ -1,13 +1,12 @@
-import { Card, CardContent } from "@/components/ui/card";
+import React from "react";
 import TransactionForm from "../components/TransactionForm";
 import TransactionList from "../components/TransactionList";
+import { Card, CardContent } from "@/components/ui/card";
+import { useTransactions } from "../context/TransactionContext";
 
-function Transactions({
-  transactions,
-  addTransaction,
-  deleteTransaction,
-  editTransaction,
-}) {
+const Transaction = () => {
+  const { transactions } = useTransactions();
+
   const balance = transactions.reduce((acc, item) => {
     return item.type === "expense"
       ? acc - Number(item.amount)
@@ -15,7 +14,7 @@ function Transactions({
   }, 0);
 
   return (
-    <div className="main-container" style={{ padding: "20px" }}>
+    <div>
       <div className="main-container">
         <h2 className="sub-heading-large">Your Transactions</h2>
         <Card>
@@ -26,21 +25,17 @@ function Transactions({
                 className="sub-heading-medium"
                 style={{ color: balance >= 0 ? "green" : "red" }}
               >
-                ${balance.toLocaleString()}
+                ₹ {balance.toLocaleString()}
               </span>
             </div>
           </CardContent>
         </Card>
       </div>
-      <TransactionForm addTransaction={addTransaction} />
 
-      <TransactionList
-        transactions={transactions}
-        deleteTransaction={deleteTransaction}
-        editTransaction={editTransaction}
-      />
+      <TransactionForm/>
+      <TransactionList/>
     </div>
   );
-}
+};
 
-export default Transactions;
+export default Transaction;

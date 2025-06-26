@@ -1,172 +1,82 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
-import {
-  ArrowDownCircle,
-  ArrowUpCircle,
-  PlusCircle,
-  TrendingUp,
-} from "lucide-react";
-import { Link } from "react-router-dom";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useTransactions } from "../context/TransactionContext";
 
-function Home({ transactions }) {
-  const stats = transactions.reduce(
-    (acc, item) => {
-      const amount = Number(item.amount);
-      if (item.type === "expense") {
-        acc.expenses += amount;
-      } else {
-        acc.income += amount;
-      }
-      acc.total = acc.income - acc.expenses;
-      return acc;
-    },
-    { total: 0, income: 0, expenses: 0 }
-  );
+const Home = () => {
+  const {transactions} = useTransactions();
 
-  const recentTransactions = transactions
-    .slice()
-    .sort((a, b) => b.id - a.id)
-    .slice(0, 3);
+  const navigate = useNavigate();
+
+
+  const income = transactions
+    .filter((t) => t.type === "income")
+    .reduce((acc, t) => acc + parseFloat(t.amount), 0);
+
+  const expenses = transactions
+    .filter((t) => t.type === "expense")
+    .reduce((acc, t) => acc + parseFloat(t.amount), 0);
+
+  const balance = income - expenses;
 
   return (
-    <div className="main-container" style={{ padding: "20px" }}>
-      <Card className="card">
-        <CardHeader>
-          <h1 className="sub-heading-large">Welcome to Your Finance Tracker</h1>
-          <p className="sub-text">
-            Take control of your finances with our easy-to-use tracking tools
-          </p>
-        </CardHeader>
-        <CardContent className="grid-container">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="sub-container">
-                <div>
-                  <p className="sub-heading-small">Total Balance</p>
-                  <p
-                    className="sub-heading-medium"
-                    style={
-                      stats.total >= 0 ? { color: "green" } : { color: "red" }
-                    }
-                  >
-                    ${stats.total.toLocaleString()}
-                  </p>
-                </div>
-                <TrendingUp
-                  className="sub-container-icon-large"
-                  style={{ color: "#666" }}
-                />
-              </div>
-            </CardContent>
-          </Card>
+    <div className="min-h-screen px-4 py-8 text-gray-800">
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="sub-container">
-                <div>
-                  <p className="sub-heading-small">Total Income</p>
-                  <p className="sub-heading-medium" style={{ color: "green" }}>
-                    ${stats.income.toLocaleString()}
-                  </p>
-                </div>
-                <ArrowUpCircle
-                  className="sub-container-icon"
-                  style={{ color: "green" }}
-                />
-              </div>
-            </CardContent>
-          </Card>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-2xl shadow text-center">
+          <h2 className="text-lg font-semibold text-gray-600">Income</h2>
+          <p className="text-2xl font-bold text-green-600">₹{income}</p>
+        </div>
+        <div className="bg-white p-6 rounded-2xl shadow text-center">
+          <h2 className="text-lg font-semibold text-gray-600">Expenses</h2>
+          <p className="text-2xl font-bold text-red-600">₹{expenses}</p>
+        </div>
+        <div className="bg-white p-6 rounded-2xl shadow text-center">
+          <h2 className="text-lg font-semibold text-gray-600">Balance</h2>
+          <p className="text-2xl font-bold text-blue-600">₹{balance}</p>
+        </div>
+      </div>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="sub-container">
-                <div>
-                  <p className="sub-heading-small">Total Expenses</p>
-                  <p className="sub-heading-medium" style={{ color: "red" }}>
-                    ${stats.expenses.toLocaleString()}
-                  </p>
-                </div>
-                <ArrowDownCircle
-                  className="sub-container-icon"
-                  style={{ color: "red" }}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </CardContent>
-        <CardFooter>
-          <Link to="/transactions">
-            <Button>
-              <PlusCircle className="sub-container-icon-large" />
-              Add New Transaction
-            </Button>
-          </Link>
-        </CardFooter>
-      </Card>
+      {/* Button */}
+      <div className="flex justify-center mb-8">
+        <button
+          onClick={() => navigate("/transaction")}
+          className="bg-green-500 text-white font-semibold px-6 py-3 rounded-xl shadow hover:bg-green-600 transition"
+        >
+          Add or View Transactions
+        </button>
+      </div>
 
-      <Card className="card">
-        <CardHeader>
-          <h2 className="sub-heading-medium">Recent Transactions</h2>
-        </CardHeader>
-        <CardContent>
-          {recentTransactions.length === 0 ? (
-            <p className="text-center text-muted-foreground py-4">
-              No transactions yet. Start by adding your first transaction!
-            </p>
-          ) : (
-            <div className="space-y-4">
-              {recentTransactions.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className="sub-container recent-transactions-card"
-                >
-                  <div>
-                    <p
-                      className="font-medium"
-                      style={{
-                        fontWeight: "500",
-                      }}
-                    >
-                      {transaction.description}
-                    </p>
-                    <p
-                      style={{
-                        color: "#666",
-                        fontWeight: "400",
-                      }}
-                    >
-                      {new Date(transaction.id).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <p
-                    style={{
-                      color: transaction.type === "expense" ? "red" : "green",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {transaction.type === "expense" ? "-" : "+"}$
-                    {Number(transaction.amount).toLocaleString()}
-                  </p>
-                </div>
-              ))}
+      {/* View Transactions List */}
+      <h2 className="text-2xl font-semibold mb-4">Recent Transactions</h2>
+      <div className="grid gap-4">
+        {transactions.slice(-5).reverse().map((transaction) => (
+          <div
+            key={transaction.id}
+            className="bg-white p-4 rounded-xl shadow flex flex-col sm:flex-row justify-between items-start sm:items-center"
+          >
+            <div>
+              <h3 className="text-lg font-medium">{transaction.title}</h3>
+              <p className="text-sm text-gray-500">{transaction.category}</p>
             </div>
-          )}
-        </CardContent>
-        <CardFooter>
-          <Link to="/transactions" className="w-full">
-            <Button variant="outline" className="w-full">
-              View All Transactions
-            </Button>
-          </Link>
-        </CardFooter>
-      </Card>
+            <div className="mt-2 sm:mt-0 text-right">
+              <p
+                className={`text-xl font-bold ₹ {
+                  transaction.type === "income" ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                ₹{transaction.amount}
+              </p>
+              <p className="text-sm text-gray-400">{transaction.date}</p>
+            </div>
+          </div>
+        ))}
+        {transactions.length === 0 && (
+          <p className="text-gray-500 text-center">No transactions yet.</p>
+        )}
+      </div>
     </div>
   );
-}
+};
 
 export default Home;
